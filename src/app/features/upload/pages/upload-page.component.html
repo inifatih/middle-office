@@ -1,0 +1,219 @@
+<main class="min-h-screen p-4 md:p-6 bg-gradient-to-br from-blue-500/10 to-sky-500/10">
+  <div class="max-w-[1600px] mx-auto">
+
+    <!-- ===================================================== -->
+    <!-- PAGE HEADER -->
+    <!-- ===================================================== -->
+    <div class="mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div>
+        <h1 class="text-3xl text-slate-900 m-0 font-bold">Upload Files</h1>
+        <p class="text-sm text-slate-500 mt-2 mb-0">Upload dan preview data dokumen Middle Office</p>
+      </div>
+      <button pButton type="button" severity="success" size="small" (click)="backToMenu()">
+        <i class="pi pi-arrow-left" pButtonIcon></i>
+        <span pButtonLabel>Back to Menu</span>
+      </button>
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- SINGLE WIDE CARD (TOP-TO-BOTTOM LAYOUT) -->
+    <!-- ===================================================== -->
+    <p-card styleClass="bg-white rounded-2xl border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
+      <div class="p-5 md:p-7 flex flex-col gap-10">
+        
+        <!-- ===================================================== -->
+        <!-- BAGIAN 1: SETUP & UPLOAD (ATAS) -->
+        <!-- ===================================================== -->
+        <div class="flex flex-col">
+          
+          <div class="mb-6 pb-4 border-b border-slate-100">
+            <h3 class="text-lg text-slate-900 m-0 font-semibold">Document Setup</h3>
+            <p class="text-sm text-slate-500 mt-1">Pilih kategori, periode, dan unggah dokumen Anda.</p>
+          </div>
+
+          <!-- KATEGORI & PERIODE (Grid menyamping khusus untuk input agar rapi) -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-semibold text-slate-900">Select Document Category</label>
+              <p-select
+                [options]="categories"
+                [(ngModel)]="selectedCategory"
+                (ngModelChange)="onCategoryChange($event)"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Pilih Kategori..."
+                [disabled]="isExtracted"
+                class="w-full [&_.p-select]:bg-white [&_.p-select]:border-slate-300"
+                styleClass="w-full">
+              </p-select>
+            </div>
+
+            <div class="flex flex-col gap-2" *ngIf="selectedCategory">
+              <label class="text-sm font-semibold text-slate-900">{{ isMonthlyCategory() ? 'Select Period (Bulan)' : 'Select Period' }}</label>
+              <p-datepicker
+                [(ngModel)]="selectedDate"
+                [view]="isMonthlyCategory() ? 'month' : 'date'"
+                [showIcon]="true"
+                [dateFormat]="isMonthlyCategory() ? 'mm/yy' : 'dd/mm/yy'"
+                [disabled]="isExtracted"
+                [placeholder]="isMonthlyCategory() ? 'Pilih Bulan' : 'Pilih Tanggal'"
+                class="w-full [&_.p-inputtext]:bg-white [&_.p-inputtext]:border-slate-300"
+                styleClass="w-full">
+              </p-datepicker>
+            </div>
+            
+          </div>
+
+          <!-- NO CATEGORY PLACEHOLDER -->
+          <div *ngIf="!selectedCategory" class="w-full flex flex-col items-center justify-center p-8 bg-slate-50 text-slate-500 rounded-xl text-center border border-dashed border-slate-200">
+            <i class="pi pi-folder-open text-4xl mb-3 text-slate-300 block"></i>
+            <p class="m-0 text-sm">Silakan pilih kategori dokumen terlebih dahulu untuk mulai mengunggah.</p>
+          </div>
+
+          <!-- FILE UPLOAD SECTION -->
+          <div *ngIf="selectedCategory && !isExtracted" class="flex flex-col w-full">
+            <label class="text-sm font-semibold text-slate-900 mb-2">Upload File Excel</label>
+            
+            <p-fileupload
+              #fileUpload
+              name="files"
+              [multiple]="false"
+              accept=".xls,.xlsx"
+              [maxFileSize]="50000000"
+              [customUpload]="true"
+              [auto]="false"
+              [showUploadButton]="false"
+              [showCancelButton]="false"
+              chooseLabel="Choose Files"
+              [chooseButtonProps]="{ severity: 'success' }"
+              (uploadHandler)="onUpload($event, fileUpload)"
+              (onSelect)="onFileSelected($event)"
+              (onRemove)="onFileCleared()"
+              (onClear)="onFileCleared()"
+              styleClass="w-full"
+            >
+              <!-- SELECTED FILE TEMPLATE -->
+              <ng-template #file let-file >
+                <div class="flex items-center justify-between gap-3 p-2.5 border border-blue-200 rounded-lg bg-blue-50/50 mb-3 mt-2">
+                  <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-8 h-8 flex items-center justify-center bg-white rounded-md border border-blue-100 shrink-0">
+                      <i class="pi pi-file-excel text-sm text-green-600"></i>
+                    </div>
+                    <div class="flex flex-col min-w-0">
+                      <span class="font-semibold text-slate-800 truncate text-xs">{{ file.name }}</span>
+                      <span class="text-xs text-slate-500">{{ formatFileSize(file.size) }}</span>
+                    </div>
+                  </div>
+                  <button pButton type="button" severity="danger" [text]="true" [rounded]="true" [iconOnly]="true" size="small" (click)="fileUpload.remove($event, 0)" class="shrink-0" aria-label="Hapus file">
+                    <i class="pi pi-trash" pButtonIcon></i>
+                  </button>
+                </div>
+              </ng-template>
+
+              <!-- EMPTY UPLOAD TEMPLATE -->
+              <ng-template #content>
+                <div
+                  *ngIf="fileUpload.files.length === 0"
+                  class="flex flex-col items-center justify-center py-12 px-4 border-2 border-dashed border-slate-300 rounded-xl bg-slate-50 hover:bg-slate-100/50 cursor-pointer transition-colors w-full"
+                  role="button"
+                  tabindex="0"
+                  (click)="fileUpload.choose()"
+                  (keydown.enter)="fileUpload.choose()"
+                >
+                  <i class="pi pi-cloud-upload text-5xl text-blue-400 mb-4"></i>
+                  <p class="m-0 text-slate-700 font-semibold text-lg">Drag and drop file Excel di sini</p>
+                  <p class="m-0 text-sm text-slate-500 mt-2">atau klik di sini atau "Choose Files" di atas (Maks. 50MB)</p>
+                </div>
+              </ng-template>
+            </p-fileupload>
+
+            <!-- UPLOAD ACTIONS -->
+            <div class="flex justify-end gap-3 mt-6">
+              <button pButton type="button" severity="danger" [outlined]="true" (click)="fileUpload.clear()" [disabled]="fileUpload.files.length === 0">
+                <i class="pi pi-trash" pButtonIcon></i>
+                <span pButtonLabel>Clear File</span>
+              </button>
+              <button pButton type="button" severity="success" (click)="fileUpload.upload()" [disabled]="fileUpload.files.length === 0">
+                <i class="pi pi-cog" pButtonIcon></i>
+                <span pButtonLabel>Ekstrak Data</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- SUCCESS STATE (When Extracted) -->
+          <div *ngIf="isExtracted" class="flex flex-col items-center justify-center w-full p-6 bg-green-50 text-green-700 rounded-xl border border-green-200 text-center">
+            <i class="pi pi-check-circle text-5xl mb-3"></i>
+            <h4 class="font-bold text-lg m-0 mb-1">File Berhasil Diekstrak</h4>
+            <p class="text-sm m-0">Data Excel Anda berhasil diproses. Silakan tinjau hasil preview di bawah ini.</p>
+          </div>
+
+        </div>
+
+        <!-- ===================================================== -->
+        <!-- BAGIAN 2: PREVIEW & ACTIONS (BAWAH) -->
+        <!-- Hanya muncul ketika file sudah dipilih/diekstrak -->
+        <!-- ===================================================== -->
+        <div class="flex flex-col border-t border-slate-200 pt-8" *ngIf="selectedFile || isExtracted">
+          
+          <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h3 class="text-lg text-slate-900 m-0 font-semibold">Data Preview</h3>
+              <p class="text-sm text-slate-500 mt-1">{{ responseMessage || 'Periksa kembali data Excel Anda sebelum di-submit.' }}</p>
+            </div>
+            
+            <div *ngIf="isExtracted" class="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg border border-blue-100 text-sm font-semibold flex items-center gap-2 shrink-0">
+              <i class="pi pi-database"></i> {{ totalRows }} baris terdeteksi
+            </div>
+          </div>
+
+          <!-- PREVIEW COMPONENT -->
+          <div class="w-full min-h-[500px] border border-slate-200 rounded-xl overflow-hidden shadow-inner flex flex-col">
+            <app-excel-sheet-preview [file]="selectedFile" sheetName="upload" class="w-full h-full block"></app-excel-sheet-preview>
+          </div>
+
+          <!-- EXTRACTED SUMMARY & SUBMIT ACTIONS -->
+          <div *ngIf="isExtracted" class="mt-8 flex flex-col gap-6">
+            
+            <!-- Summary Info -->
+            <div class="p-5 rounded-xl bg-slate-50 border border-slate-100 grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div class="flex flex-col gap-1">
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Sheet Name</span>
+                <span class="text-sm font-medium text-slate-900">upload</span>
+              </div>
+              <div class="flex flex-col gap-1">
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</span>
+                <span class="text-sm font-bold text-green-600 uppercase">Success</span>
+              </div>
+              <div class="flex flex-col gap-1">
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Baris Backend</span>
+                <span class="text-lg font-semibold text-slate-800">{{ extractedData?.length || 0 }}</span>
+              </div>
+              <div class="flex flex-col gap-1">
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Kolom Terdeteksi</span>
+                <span class="text-lg font-semibold text-slate-800">{{ tableColumns?.length || 0 }}</span>
+              </div>
+            </div>
+
+            <!-- Submit/Cancel Buttons -->
+            <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
+              <button pButton type="button" severity="danger" [outlined]="true" (click)="cancelPreview()">
+                <i class="pi pi-times" pButtonIcon></i>
+                <span pButtonLabel>Batalkan &amp; Upload Ulang</span>
+              </button>
+              <button pButton type="button" severity="success" (click)="submitData()">
+                <i class="pi pi-save" pButtonIcon></i>
+                <span pButtonLabel>Simpan ke Database</span>
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </p-card>
+
+    <p-toast position="top-right"></p-toast>
+  </div>
+</main>

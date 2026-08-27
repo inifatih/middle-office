@@ -1,0 +1,102 @@
+<div class="w-full">
+
+  <!-- LOADING -->
+  <div
+    *ngIf="loading()"
+    class="flex items-center justify-center gap-2 py-10 text-slate-500 text-sm border border-[#d0d0d0] bg-white"
+  >
+    <i class="pi pi-spin pi-spinner"></i>
+    Membaca file Excel...
+  </div>
+
+  <!-- ERROR -->
+  <div
+    *ngIf="!loading() && error()"
+    class="flex flex-col items-center justify-center gap-2 py-8 px-4 text-center border border-dashed border-red-200 bg-red-50 text-red-600 text-sm rounded"
+  >
+    <i class="pi pi-exclamation-triangle text-2xl"></i>
+    <span>{{ error() }}</span>
+  </div>
+
+  <!-- GRID -->
+  <div *ngIf="!loading() && !error() && grid().length > 0">
+
+    <div class="flex items-center justify-between mb-1 px-0.5">
+      <span class="text-xs text-slate-500">
+        Sheet: <span class="font-semibold text-slate-700">{{ resolvedSheetName() }}</span>
+        <span class="text-slate-400">&bull; seret garis antar kolom untuk mengubah lebar</span>
+      </span>
+      <span *ngIf="truncated()" class="text-xs text-amber-600">
+        Menampilkan sebagian data (sheet terlalu besar untuk ditampilkan penuh)
+      </span>
+    </div>
+
+    <div class="w-full overflow-auto border border-[#c0c0c0] bg-white shadow-sm max-h-[640px]">
+      <table
+        class="border-collapse select-none"
+        style="font-family: Calibri, 'Segoe UI', Arial, sans-serif; table-layout: fixed;"
+        [style.width.px]="tableWidth()"
+      >
+        <colgroup>
+          <col [style.width.px]="rowHeaderWidth" />
+          <col *ngFor="let w of columnWidths(); let i = index; trackBy: trackByIndex" [style.width.px]="w" />
+        </colgroup>
+
+        <thead>
+          <tr>
+            <th
+              class="sticky top-0 left-0 z-20 bg-[#e6e6e6] border-r border-b border-[#c0c0c0]"
+            ></th>
+            <th
+              *ngFor="let letter of columnLetters(); let i = index; trackBy: trackByIndex"
+              class="relative sticky top-0 z-10 bg-[#e6e6e6] border-r border-b border-[#c0c0c0] text-[#444] text-xs font-normal text-center px-2 py-1 overflow-hidden"
+            >
+              <span class="truncate block">{{ letter }}</span>
+
+              <span
+                class="absolute top-0 right-0 h-full w-2.5 -mr-1 cursor-col-resize hover:bg-blue-400/60 active:bg-blue-500/70 z-30"
+                (mousedown)="startResize($event, i)"
+              ></span>
+            </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let row of grid(); let rIndex = index">
+            <td
+              class="sticky left-0 z-10 bg-[#e6e6e6] border-r border-b border-[#c0c0c0] text-[#444] text-xs text-center px-2 py-1 whitespace-nowrap"
+            >
+              {{ rowNumbers()[rIndex] }}
+            </td>
+
+            <ng-container *ngFor="let cell of row">
+              <td
+                *ngIf="!cell.hidden"
+                [attr.rowspan]="cell.rowSpan > 1 ? cell.rowSpan : null"
+                [attr.colspan]="cell.colSpan > 1 ? cell.colSpan : null"
+                class="border-r border-b border-[#e2e2e2] text-[13px] px-2 py-1 overflow-hidden text-ellipsis whitespace-nowrap align-middle"
+                [title]="cell.text"
+                [class.text-right]="cell.align === 'right'"
+                [class.text-left]="cell.align === 'left'"
+                [class.font-semibold]="cell.bold"
+                [style.background-color]="cell.bg"
+                [style.color]="cell.color"
+              >
+                {{ cell.text }}
+              </td>
+            </ng-container>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- EMPTY (no file yet) -->
+  <div
+    *ngIf="!loading() && !error() && grid().length === 0 && !file()"
+    class="py-8 text-center text-sm text-slate-400 border border-dashed border-slate-200 rounded"
+  >
+    Belum ada file yang dipilih.
+  </div>
+
+</div>

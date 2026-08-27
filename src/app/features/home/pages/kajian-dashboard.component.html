@@ -1,0 +1,109 @@
+<main class="min-h-screen p-4 md:p-6 bg-gradient-to-br from-blue-500/10 to-sky-500/10">
+  <div class="max-w-[1600px] mx-auto">
+    <div class="mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <h1 class="text-3xl text-slate-900 m-0 font-bold">Kajian Risiko Likuiditas</h1>
+      <button pButton type="button" severity="success" size="small" (click)="backToMenu()">
+        <i class="pi pi-arrow-left" pButtonIcon></i>
+        <span pButtonLabel>Back to Menu</span>
+      </button>
+    </div>
+
+    <p-card styleClass="bg-white rounded-2xl border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
+      <div class="p-5 md:p-7">
+
+        <!-- Filter -->
+        <div class="flex flex-col md:flex-row md:items-end gap-4 mb-7 pb-6 border-b border-slate-100 flex-wrap">
+          <div class="flex flex-col gap-2 flex-1 min-w-[220px]">
+            <label class="text-sm font-semibold text-slate-900">Kategori</label>
+            <p-select
+              [options]="categoryGroups()"
+              [(ngModel)]="selectedCategory"
+              optionLabel="label"
+              optionValue="value"
+              optionGroupLabel="label"
+              optionGroupChildren="items"
+              [group]="true"
+              placeholder="Pilih Kategori"
+              styleClass="w-full"
+            ></p-select>
+          </div>
+
+          <div class="flex flex-col gap-2 flex-1 min-w-[260px]">
+            <label class="text-sm font-semibold text-slate-900">Tanggal Awal <span class="text-slate-400 font-normal">(rentang tetap 5 hari)</span></label>
+            <p-datepicker
+              [ngModel]="dateRange()"
+              (onSelect)="onStartDateSelect($event)"
+              selectionMode="range"
+              [showIcon]="true"
+              dateFormat="dd/mm/yy"
+              placeholder="Pilih tanggal awal"
+              styleClass="w-full"
+              inputStyleClass="w-full"
+            ></p-datepicker>
+          </div>
+
+          <button pButton type="button" severity="success" class="shrink-0" (click)="resetFilters()">
+            <i class="pi pi-refresh" pButtonIcon></i>
+            <span pButtonLabel>Reset</span>
+          </button>
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="loading()" class="py-16 flex flex-col items-center justify-center text-slate-400">
+          <i class="pi pi-spin pi-spinner text-4xl mb-3 text-blue-400"></i>
+          <p class="m-0">Memuat data dari backend...</p>
+        </div>
+
+        <!-- Error -->
+        <div *ngIf="!loading() && error()" class="p-6 bg-red-50 border border-dashed border-red-200 rounded-xl text-center text-red-600">
+          <i class="pi pi-exclamation-triangle text-3xl mb-2 block"></i>
+          {{ error() }}
+        </div>
+
+        <!-- Content -->
+        <div *ngIf="!loading() && !error() && selectedChart() as chart">
+          <div class="mb-6 flex items-center justify-between flex-wrap gap-2">
+            <h2 class="text-2xl text-slate-900 m-0 font-semibold">{{ chart.groupLabel }} &mdash; {{ chart.title }}</h2>
+            <span class="text-sm text-slate-500">
+              Periode: <span class="font-semibold text-slate-700">{{ periodsInRange().join(', ') || '-' }}</span>
+            </span>
+          </div>
+
+          <!-- Metric table: one column per period in range, so every selected date has its own card -->
+          <div class="overflow-x-auto rounded-xl border border-slate-100 mb-8">
+            <table class="w-full border-collapse text-sm">
+              <thead>
+                <tr class="bg-slate-50">
+                  <th class="text-left font-semibold text-slate-500 uppercase text-xs tracking-wide px-4 py-3 border-b border-slate-100 sticky left-0 bg-slate-50 z-10">Metrik</th>
+                  <th class="text-center font-semibold text-slate-500 uppercase text-xs tracking-wide px-4 py-3 border-b border-slate-100 whitespace-nowrap" *ngFor="let period of periodsInRange()">
+                    {{ period | date: 'dd MMM yyyy' }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="border-b border-slate-50 last:border-0 even:bg-slate-50/40" *ngFor="let row of metricRows()">
+                  <td class="px-4 py-3 font-semibold text-slate-700 whitespace-nowrap sticky left-0 bg-white">{{ row.label }}</td>
+                  <td class="px-4 py-3 text-center whitespace-nowrap" *ngFor="let period of periodsInRange()">
+                    <p-tag *ngIf="row.isText" [value]="row.textValue || '-'" [severity]="trafficSeverity(row.textValue)"></p-tag>
+                    <span *ngIf="!row.isText" class="font-semibold text-slate-900">
+                      {{ isPercentUnit(row.unit) ? fmtPercent(row.values[period] ?? null) : fmt(row.values[period] ?? null) }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Line chart -->
+          <div class="h-[340px] md:h-[400px] bg-slate-50 border border-slate-100 rounded-xl p-4" *ngIf="chartData()">
+            <p-chart type="line" [data]="chartData()" [options]="chartOptions" class="block w-full h-full"></p-chart>
+          </div>
+          <div class="py-8 text-center text-sm text-slate-400" *ngIf="!chartData()">
+            Kategori ini tidak memiliki metrik bergrafik (hanya informasi status).
+          </div>
+        </div>
+
+      </div>
+    </p-card>
+  </div>
+</main>

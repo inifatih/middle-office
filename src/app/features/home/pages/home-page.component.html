@@ -1,0 +1,65 @@
+<main class="min-h-screen flex items-center justify-center py-10 px-6 bg-gradient-to-br from-blue-500/10 to-sky-500/10">
+  <div class="w-full max-w-[1000px] flex flex-col gap-10">
+    <div class="text-center">
+      <h1 class="text-4xl text-slate-900 m-0 mb-2.5 font-bold tracking-tight">Middle Office</h1>
+      <p class="text-base text-slate-500 m-0">Dashboard, Upload, Checker</p>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-6">
+      
+      <p-card styleClass="bg-white cursor-pointer h-full rounded-2xl border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-1 hover:shadow-[0_15px_40px_rgb(0,0,0,0.08)] transition-all duration-300 overflow-hidden">
+        <div class="flex flex-col items-center text-center p-6 h-full">
+          <div class="text-5xl mb-4 w-20 h-20 flex items-center justify-center rounded-xl bg-blue-500/10 text-blue-600">
+            <span class="pi pi-chart-line text-[inherit]"></span>
+          </div>
+          <h2 class="text-2xl text-slate-900 m-0 mb-2 font-semibold">Dashboard</h2>
+          <p class="text-sm text-slate-500 m-0 mb-5 flex-grow flex items-center justify-center">View analytics and metrics</p>
+          
+          <!-- Dropdown p-select persis seperti di dashboard-page -->
+          <div class="w-full">
+            <p-select
+              [options]="dashboardOptions"
+              optionLabel="label"
+              optionValue="value"
+              [(ngModel)]="selectedDashboard"
+              (onChange)="onDashboardChange()"
+              [showClear]="false"
+              placeholder="Pilih Dashboard"
+              class="w-full [&_.p-select]:bg-white"
+              styleClass="w-full"
+            ></p-select>
+          </div>
+        </div>
+      </p-card>
+
+      <p-card (click)="navigateTo('upload')" styleClass="bg-white cursor-pointer h-full rounded-2xl border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-1 hover:shadow-[0_15px_40px_rgb(0,0,0,0.08)] transition-all duration-300 overflow-hidden">
+        <div class="flex flex-col items-center text-center p-6 h-full">
+          <div class="text-5xl mb-4 w-20 h-20 flex items-center justify-center rounded-xl bg-emerald-500/10 text-teal-600">
+            <span class="pi pi-upload text-[inherit]"></span>
+          </div>
+          <h2 class="text-2xl text-slate-900 m-0 mb-2 font-semibold">Upload</h2>
+          <p class="text-sm text-slate-500 m-0 mb-5 flex-grow flex items-center justify-center">Upload files for processing</p>
+          <button pButton type="button" severity="success" class="w-full">
+            <span pButtonLabel>Upload File</span>
+            <i class="pi pi-arrow-right" pButtonIcon></i>
+          </button>
+        </div>
+      </p-card>
+
+      <p-card (click)="navigateTo('checker')" styleClass="bg-white cursor-pointer h-full rounded-2xl border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-1 hover:shadow-[0_15px_40px_rgb(0,0,0,0.08)] transition-all duration-300 overflow-hidden">
+        <div class="flex flex-col items-center text-center p-6 h-full">
+          <div class="text-5xl mb-4 w-20 h-20 flex items-center justify-center rounded-xl bg-purple-500/10 text-purple-600">
+            <span class="pi pi-check text-[inherit]"></span>
+          </div>
+          <h2 class="text-2xl text-slate-900 m-0 mb-2 font-semibold">Checker</h2>
+          <p class="text-sm text-slate-500 m-0 mb-5 flex-grow flex items-center justify-center">Review and approve files</p>
+          <button pButton type="button" severity="success" class="w-full">
+            <span pButtonLabel>Check Uploaded File</span>
+            <i class="pi pi-arrow-right" pButtonIcon></i>
+          </button>
+        </div>
+      </p-card>
+
+    </div>
+  </div>
+</main>

@@ -1,0 +1,131 @@
+<main class="min-h-screen p-4 md:p-6 bg-gradient-to-br from-blue-500/10 to-sky-500/10">
+  <div class="max-w-[1600px] mx-auto">
+    <div class="mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <h1 class="text-3xl text-slate-900 m-0 font-bold">Profil Maturitas KLN</h1>
+      <button pButton type="button" severity="success" size="small" (click)="backToMenu()">
+        <i class="pi pi-arrow-left" pButtonIcon></i>
+        <span pButtonLabel>Back to Menu</span>
+      </button>
+    </div>
+
+    <p-card styleClass="bg-white rounded-2xl border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
+      <div class="p-5 md:p-7">
+
+        <!-- Filter: Cabang gets its own full-width row since 6 checkboxes need more room than a
+             fixed-width column can give them; Bulan Awal sits on the row below, mirroring the
+             Kajian Harian layout. -->
+        <div class="flex flex-col gap-4 mb-7 pb-6 border-b border-slate-100">
+          <div class="flex flex-col gap-2">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <label class="text-sm font-semibold text-slate-900">Cabang</label>
+              <div class="flex items-center gap-2">
+                <button pButton type="button" severity="success" [text]="true" size="small" (click)="selectAllBranches()">
+                  <i class="pi pi-check-square" pButtonIcon></i>
+                  <span pButtonLabel>Pilih Semua</span>
+                </button>
+                <button pButton type="button" severity="danger" [text]="true" size="small" (click)="clearBranches()">
+                  <i class="pi pi-times" pButtonIcon></i>
+                  <span pButtonLabel>Hapus Semua</span>
+                </button>
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-x-5 gap-y-2">
+              <div class="flex items-center gap-2" *ngFor="let b of branches()">
+                <p-checkbox
+                  [binary]="true"
+                  [ngModel]="checkedBranches().has(b.key)"
+                  (ngModelChange)="toggleBranch(b.key, $event)"
+                  [inputId]="'branch-' + b.key"
+                ></p-checkbox>
+                <label [for]="'branch-' + b.key" class="text-sm text-slate-700 cursor-pointer">{{ b.label }}</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-2 max-w-[320px]">
+            <label class="text-sm font-semibold text-slate-900">Bulan Awal <span class="text-slate-400 font-normal">(rentang tetap 5 bulan)</span></label>
+            <p-datepicker
+              [ngModel]="dateRange()"
+              (onSelect)="onStartMonthSelect($event)"
+              selectionMode="range"
+              view="month"
+              dateFormat="mm/yy"
+              [showIcon]="true"
+              placeholder="Pilih bulan awal"
+              styleClass="w-full"
+              inputStyleClass="w-full"
+            ></p-datepicker>
+          </div>
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="loading()" class="py-16 flex flex-col items-center justify-center text-slate-400">
+          <i class="pi pi-spin pi-spinner text-4xl mb-3 text-emerald-400"></i>
+          <p class="m-0">Memuat data dari backend...</p>
+        </div>
+
+        <!-- Error -->
+        <div *ngIf="!loading() && error()" class="p-6 bg-red-50 border border-dashed border-red-200 rounded-xl text-center text-red-600">
+          <i class="pi pi-exclamation-triangle text-3xl mb-2 block"></i>
+          {{ error() }}
+        </div>
+
+        <!-- No branch selected -->
+        <div *ngIf="!loading() && !error() && checkedBranchList().length === 0" class="py-12 flex flex-col items-center justify-center text-slate-400">
+          <i class="pi pi-map-marker text-5xl mb-4 text-emerald-300"></i>
+          <p class="text-lg font-medium text-slate-600 m-0">Pilih minimal satu cabang untuk menampilkan data.</p>
+        </div>
+
+        <!-- Content -->
+        <div *ngIf="!loading() && !error() && checkedBranchList().length > 0">
+          <div class="mb-6 flex items-center justify-between flex-wrap gap-2">
+            <h2 class="text-2xl text-slate-900 m-0 font-semibold">Profil Maturitas per Cabang</h2>
+            <span class="text-sm text-slate-500">
+              Periode: <span class="font-semibold text-slate-700">{{ periodsInRange().join(', ') || '-' }}</span>
+            </span>
+          </div>
+
+          <!-- One metric table per checked branch: a column per period in range, so every selected
+               month has its own card, not just the latest one. -->
+          <div class="flex flex-col gap-6 mb-8">
+            <div class="border border-slate-100 rounded-xl overflow-hidden" *ngFor="let b of branchTables()">
+              
+              <div class="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-100">
+                <h3 class="font-bold text-base m-0 text-slate-900">{{ b.label }}</h3>
+                <p-tag [value]="b.trafficLight || '-'" [severity]="trafficSeverity(b.trafficLight)" styleClass="text-xs"></p-tag>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full border-collapse text-sm">
+                  <thead>
+                    <tr>
+                      <th class="text-left font-semibold text-slate-500 uppercase text-xs tracking-wide px-4 py-3 border-b border-slate-100 sticky left-0 bg-white z-10">Metrik</th>
+                      <th class="text-center font-semibold text-slate-500 uppercase text-xs tracking-wide px-4 py-3 border-b border-slate-100 whitespace-nowrap" *ngFor="let period of periodsInRange()">
+                        {{ period | date: 'MMM yyyy' }}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="border-b border-slate-50 last:border-0 even:bg-slate-50/40" *ngFor="let row of b.rows">
+                      <td class="px-4 py-3 font-semibold text-slate-700 whitespace-nowrap sticky left-0 bg-white">{{ row.label }}</td>
+                      <td class="px-4 py-3 text-center whitespace-nowrap" *ngFor="let period of periodsInRange()">
+                        <p-tag *ngIf="row.isText" [value]="row.textValue || '-'" [severity]="trafficSeverity(row.textValue)"></p-tag>
+                        <span *ngIf="!row.isText" class="font-semibold text-slate-900">
+                          {{ row.unit === '%' ? fmtPercent(row.values[period] ?? null) : fmt(row.values[period] ?? null) }}
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="h-[340px] md:h-[400px] bg-slate-50 border border-slate-100 rounded-xl p-4" *ngIf="chartData()">
+            <p-chart type="line" [data]="chartData()" [options]="chartOptions" class="block w-full h-full"></p-chart>
+          </div>
+        </div>
+
+      </div>
+    </p-card>
+  </div>
+</main>
