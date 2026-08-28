@@ -4,7 +4,7 @@
     <!-- ===================================================== -->
     <!-- PAGE HEADER -->
     <!-- ===================================================== -->
-    <div class="mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <div class="mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
       <div>
         <h1 class="text-3xl text-slate-900 m-0 font-bold">Upload Files</h1>
         <p class="text-sm text-slate-500 mt-2 mb-0">Upload dan preview data dokumen Middle Office</p>
@@ -19,7 +19,7 @@
     <!-- SINGLE WIDE CARD (TOP-TO-BOTTOM LAYOUT) -->
     <!-- ===================================================== -->
     <p-card styleClass="bg-white rounded-2xl border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
-      <div class="p-5 md:p-7 flex flex-col gap-10">
+      <div class="p-5 md:p-6 flex flex-col gap-8">
         
         <!-- ===================================================== -->
         <!-- BAGIAN 1: SETUP & UPLOAD (ATAS) -->
@@ -154,7 +154,7 @@
         <!-- BAGIAN 2: PREVIEW & ACTIONS (BAWAH) -->
         <!-- Hanya muncul ketika file sudah dipilih/diekstrak -->
         <!-- ===================================================== -->
-        <div class="flex flex-col border-t border-slate-200 pt-8" *ngIf="selectedFile || isExtracted">
+        <div class="flex flex-col border-t border-slate-200 pt-6" *ngIf="selectedFile || isExtracted">
           
           <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
@@ -173,7 +173,7 @@
           </div>
 
           <!-- EXTRACTED SUMMARY & SUBMIT ACTIONS -->
-          <div *ngIf="isExtracted" class="mt-8 flex flex-col gap-6">
+          <div *ngIf="isExtracted" class="mt-6 flex flex-col gap-6">
             
             <!-- Summary Info -->
             <div class="p-5 rounded-xl bg-slate-50 border border-slate-100 grid grid-cols-2 md:grid-cols-4 gap-6">

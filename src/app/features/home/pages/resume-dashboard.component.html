@@ -9,9 +9,9 @@
     </div>
 
     <p-card styleClass="bg-white rounded-2xl border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
-      <div class="p-5 md:p-7">
+      <div class="p-5 md:p-6">
 
-        <div class="flex flex-col md:flex-row gap-6 mb-7 pb-6 border-b border-slate-100">
+        <div class="flex flex-col md:flex-row gap-6 mb-5 pb-5 border-b border-slate-100">
           <div class="flex flex-col gap-2 min-w-[220px]">
             <label class="text-sm font-semibold text-slate-900">Select Period</label>
             <p-datepicker [(ngModel)]="selectedDate" (ngModelChange)="onDateChange()" [showIcon]="true" dateFormat="dd/mm/yy" placeholder="Pilih Periode Laporan..." styleClass="w-full"></p-datepicker>
@@ -39,7 +39,7 @@
             <span class="text-sm text-slate-500">Periode data: <span class="font-semibold text-slate-700">{{ s.periode || (selectedDate | date:'mediumDate') }}</span></span>
           </div>
 
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div class="p-5 bg-slate-50 border border-slate-100 rounded-xl">
               <div class="text-xs text-slate-500 mb-2 font-semibold uppercase tracking-wide">Asset (IDR)</div>
               <div class="text-2xl font-bold text-slate-900">{{ fmt(s.assetIdr) }}</div>
@@ -60,7 +60,7 @@
             </div>
           </div>
 
-          <div class="h-[340px] md:h-[400px] bg-slate-50 border border-slate-100 rounded-xl p-4">
+          <div class="h-[320px] md:h-[360px] bg-slate-50 border border-slate-100 rounded-xl p-4">
             <p-chart type="line" [data]="chartData" [options]="chartOptions" class="block w-full h-full"></p-chart>
           </div>
         </div>

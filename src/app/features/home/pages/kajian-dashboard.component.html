@@ -9,10 +9,10 @@
     </div>
 
     <p-card styleClass="bg-white rounded-2xl border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
-      <div class="p-5 md:p-7">
+      <div class="p-5 md:p-6">
 
         <!-- Filter -->
-        <div class="flex flex-col md:flex-row md:items-end gap-4 mb-7 pb-6 border-b border-slate-100 flex-wrap">
+        <div class="flex flex-col md:flex-row md:items-end gap-4 mb-5 pb-5 border-b border-slate-100 flex-wrap">
           <div class="flex flex-col gap-2 flex-1 min-w-[220px]">
             <label class="text-sm font-semibold text-slate-900">Kategori</label>
             <p-select
@@ -70,7 +70,7 @@
           </div>
 
           <!-- Metric table: one column per period in range, so every selected date has its own card -->
-          <div class="overflow-x-auto rounded-xl border border-slate-100 mb-8">
+          <div class="overflow-x-auto rounded-xl border border-slate-100 mb-6">
             <table class="w-full border-collapse text-sm">
               <thead>
                 <tr class="bg-slate-50">
@@ -95,7 +95,7 @@
           </div>
 
           <!-- Line chart -->
-          <div class="h-[340px] md:h-[400px] bg-slate-50 border border-slate-100 rounded-xl p-4" *ngIf="chartData()">
+          <div class="h-[320px] md:h-[360px] bg-slate-50 border border-slate-100 rounded-xl p-4" *ngIf="chartData()">
             <p-chart type="line" [data]="chartData()" [options]="chartOptions" class="block w-full h-full"></p-chart>
           </div>
           <div class="py-8 text-center text-sm text-slate-400" *ngIf="!chartData()">
