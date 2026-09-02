@@ -2,58 +2,102 @@
   <div class="max-w-[1600px] mx-auto">
     <div class="mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
       <h1 class="text-3xl text-slate-900 m-0 font-bold">Profil Maturitas KLN</h1>
-      <button pButton type="button" severity="success" size="small" (click)="backToMenu()">
-        <i class="pi pi-arrow-left" pButtonIcon></i>
-        <span pButtonLabel>Back to Menu</span>
-      </button>
+      <div class="flex items-center gap-2">
+        <p-select
+          [options]="downloadOptions"
+          [(ngModel)]="selectedDownload"
+          optionLabel="label"
+          optionValue="value"
+          optionDisabled="disabled"
+          placeholder="Download"
+          dropdownIcon="pi pi-download"
+          [disabled]="!canDownload()"
+          (onShow)="syncDownloadOptions()"
+          (onChange)="onDownloadSelect()"
+          styleClass="w-56"
+        ></p-select>
+        <button pButton type="button" severity="success" (click)="backToMenu()">
+          <i class="pi pi-arrow-left" pButtonIcon></i>
+          <span pButtonLabel>Back to Menu</span>
+        </button>
+      </div>
     </div>
 
     <p-card styleClass="bg-white rounded-2xl border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
       <div class="p-5 md:p-7">
 
-        <!-- Filter: Cabang gets its own full-width row since 6 checkboxes need more room than a
-             fixed-width column can give them; Bulan Awal sits on the row below, mirroring the
-             Kajian Harian layout. -->
-        <div class="flex flex-col gap-4 mb-7 pb-6 border-b border-slate-100">
-          <div class="flex flex-col gap-2">
-            <div class="flex items-center justify-between flex-wrap gap-2">
+        <!-- Filter: Cabang + Metrik stack on the left, Periode sits on the right;
+             everything collapses to a single column once it gets narrow. -->
+        <div class="flex flex-col lg:flex-row lg:items-start gap-6 lg:gap-8 mb-7 pb-6 border-b border-slate-100">
+          <div class="flex-1 min-w-0 flex flex-col gap-5">
+
+            <!-- Filter cabang -->
+            <div class="flex flex-col gap-2">
               <label class="text-sm font-semibold text-slate-900">Cabang</label>
-              <div class="flex items-center gap-2">
-                <button pButton type="button" severity="success" [text]="true" size="small" (click)="selectAllBranches()">
+              <div class="flex flex-wrap gap-x-5 gap-y-2">
+                <div class="flex items-center gap-2" *ngFor="let b of branches()">
+                  <p-checkbox
+                    [binary]="true"
+                    [ngModel]="checkedBranches().has(b.key)"
+                    (ngModelChange)="toggleBranch(b.key, $event)"
+                    [inputId]="'branch-' + b.key"
+                  ></p-checkbox>
+                  <label [for]="'branch-' + b.key" class="text-sm text-slate-700 cursor-pointer">{{ b.label }}</label>
+                </div>
+              </div>
+              <div class="flex items-center flex-wrap gap-2">
+                <button pButton type="button" severity="success" [outlined]="true" size="small" class="btn-xs" (click)="setAll('cabang', true)">
                   <i class="pi pi-check-square" pButtonIcon></i>
                   <span pButtonLabel>Pilih Semua</span>
                 </button>
-                <button pButton type="button" severity="danger" [text]="true" size="small" (click)="clearBranches()">
+                <button pButton type="button" severity="danger" [outlined]="true" size="small" class="btn-xs" (click)="setAll('cabang', false)">
                   <i class="pi pi-times" pButtonIcon></i>
                   <span pButtonLabel>Hapus Semua</span>
                 </button>
               </div>
             </div>
-            <div class="flex flex-wrap gap-x-5 gap-y-2">
-              <div class="flex items-center gap-2" *ngFor="let b of branches()">
-                <p-checkbox
-                  [binary]="true"
-                  [ngModel]="checkedBranches().has(b.key)"
-                  (ngModelChange)="toggleBranch(b.key, $event)"
-                  [inputId]="'branch-' + b.key"
-                ></p-checkbox>
-                <label [for]="'branch-' + b.key" class="text-sm text-slate-700 cursor-pointer">{{ b.label }}</label>
+
+            <!-- Filter metrik -->
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-semibold text-slate-900">Metrik</label>
+              <div class="flex flex-wrap gap-x-5 gap-y-2">
+                <div class="flex items-center gap-2" *ngFor="let m of metrics()">
+                  <p-checkbox
+                    [binary]="true"
+                    [ngModel]="checkedMetrics().has(m.key)"
+                    (ngModelChange)="toggleMetric(m.key, $event)"
+                    [inputId]="'metric-' + m.key"
+                  ></p-checkbox>
+                  <label [for]="'metric-' + m.key" class="text-sm text-slate-700 cursor-pointer">{{ m.label }}</label>
+                </div>
+              </div>
+              <div class="flex items-center flex-wrap gap-2">
+                <button pButton type="button" severity="success" [outlined]="true" size="small" class="btn-xs" (click)="setAll('metrik', true)">
+                  <i class="pi pi-check-square" pButtonIcon></i>
+                  <span pButtonLabel>Pilih Semua</span>
+                </button>
+                <button pButton type="button" severity="danger" [outlined]="true" size="small" class="btn-xs" (click)="setAll('metrik', false)">
+                  <i class="pi pi-times" pButtonIcon></i>
+                  <span pButtonLabel>Hapus Semua</span>
+                </button>
               </div>
             </div>
           </div>
 
-          <div class="flex flex-col gap-2 max-w-[320px]">
-            <label class="text-sm font-semibold text-slate-900">Bulan Awal <span class="text-slate-400 font-normal">(rentang tetap 5 bulan)</span></label>
+          <div class="flex flex-col gap-2 w-full lg:w-[320px] lg:shrink-0">
+            <label class="text-sm font-semibold text-slate-900">Rentang Bulan <span class="text-slate-400 font-normal">({{ minPeriods }}&ndash;{{ maxPeriods }} bulan)</span></label>
             <p-datepicker
               [ngModel]="dateRange()"
-              (onSelect)="onStartMonthSelect($event)"
+              (ngModelChange)="onRangeChange($event)"
               selectionMode="range"
               view="month"
               dateFormat="mm/yy"
               [showIcon]="true"
-              placeholder="Pilih bulan awal"
+              [readonlyInput]="true"
+              placeholder="Pilih rentang bulan"
               styleClass="w-full"
               inputStyleClass="w-full"
+              panelStyleClass="kln-datepicker-panel"
             ></p-datepicker>
           </div>
         </div>
@@ -70,18 +114,18 @@
           {{ error() }}
         </div>
 
-        <!-- No branch selected -->
-        <div *ngIf="!loading() && !error() && checkedBranchList().length === 0" class="py-12 flex flex-col items-center justify-center text-slate-400">
-          <i class="pi pi-map-marker text-5xl mb-4 text-emerald-300"></i>
-          <p class="text-lg font-medium text-slate-600 m-0">Pilih minimal satu cabang untuk menampilkan data.</p>
+        <!-- Nothing selected -->
+        <div *ngIf="!loading() && !error() && !hasSelection()" class="py-12 flex flex-col items-center justify-center text-slate-400">
+          <i class="pi pi-sliders-h text-5xl mb-4 text-emerald-300"></i>
+          <p class="text-lg font-medium text-slate-600 m-0">Pilih minimal satu cabang dan satu metrik untuk menampilkan data.</p>
         </div>
 
         <!-- Content -->
-        <div *ngIf="!loading() && !error() && checkedBranchList().length > 0">
+        <div *ngIf="!loading() && !error() && hasSelection()">
           <div class="mb-6 flex items-center justify-between flex-wrap gap-2">
-            <h2 class="text-2xl text-slate-900 m-0 font-semibold">Profil Maturitas per Cabang</h2>
-            <span class="text-sm text-slate-500">
-              Periode: <span class="font-semibold text-slate-700">{{ periodsInRange().join(', ') || '-' }}</span>
+            <h2 class="text-2xl text-slate-900 m-0 font-semibold">Analisis Metrik per Cabang</h2>
+            <span class="text-sm bg-emerald-500/10 text-emerald-700 px-2.5 py-1 rounded-md">
+              Periode: <span class="font-semibold text-emerald-900">{{ periodsInRange().join(', ') || '-' }}</span>
             </span>
           </div>
 
@@ -120,8 +164,19 @@
             </div>
           </div>
 
-          <div class="h-[340px] md:h-[400px] bg-slate-50 border border-slate-100 rounded-xl p-4" *ngIf="chartData()">
-            <p-chart type="line" [data]="chartData()" [options]="chartOptions" class="block w-full h-full"></p-chart>
+          <div
+            class="grid grid-cols-1 gap-5"
+            [ngClass]="{ 'xl:grid-cols-2': metricCharts().length > 1 }"
+            *ngIf="metricCharts().length"
+          >
+            <div class="flex flex-col gap-2" *ngFor="let mc of metricCharts()">
+              <h3 class="text-sm font-semibold text-slate-800 m-0">
+                {{ mc.label }}<span class="text-slate-400 font-normal" *ngIf="mc.unit"> ({{ mc.unit }})</span>
+              </h3>
+              <div class="h-[300px] bg-slate-50 border border-slate-100 rounded-xl p-4">
+                <p-chart type="line" [data]="mc.data" [options]="mc.options" class="block w-full h-full"></p-chart>
+              </div>
+            </div>
           </div>
         </div>
 

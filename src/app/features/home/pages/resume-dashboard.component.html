@@ -2,10 +2,25 @@
   <div class="max-w-[1600px] mx-auto">
     <div class="mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
       <h1 class="text-3xl text-slate-900 m-0 font-bold">Resume Maturity Profile</h1>
-      <button pButton type="button" severity="success" size="small" (click)="backToMenu()">
-        <i class="pi pi-arrow-left" pButtonIcon></i>
-        <span pButtonLabel>Back to Menu</span>
-      </button>
+      <div class="flex items-center gap-2">
+        <p-select
+          [options]="downloadOptions"
+          [(ngModel)]="selectedDownload"
+          optionLabel="label"
+          optionValue="value"
+          optionDisabled="disabled"
+          placeholder="Download"
+          dropdownIcon="pi pi-download"
+          [disabled]="!canDownload()"
+          (onShow)="syncDownloadOptions()"
+          (onChange)="onDownloadSelect()"
+          styleClass="w-56"
+        ></p-select>
+        <button pButton type="button" severity="success" (click)="backToMenu()">
+          <i class="pi pi-arrow-left" pButtonIcon></i>
+          <span pButtonLabel>Back to Menu</span>
+        </button>
+      </div>
     </div>
 
     <p-card styleClass="bg-white rounded-2xl border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
@@ -36,7 +51,7 @@
         <div *ngIf="selectedDate && !loading() && !error() && summary() as s">
           <div class="mb-6 flex items-center justify-between flex-wrap gap-2">
             <h2 class="text-2xl text-slate-900 m-0 font-semibold">Neraca — Tipe {{ s.tipe }}</h2>
-            <span class="text-sm text-slate-500">Periode data: <span class="font-semibold text-slate-700">{{ s.periode || (selectedDate | date:'mediumDate') }}</span></span>
+            <span class="text-sm bg-emerald-500/10 text-emerald-700 px-2.5 py-1 rounded-md">Periode data: <span class="font-semibold text-emerald-900">{{ s.periode || (selectedDate | date:'mediumDate') }}</span></span>
           </div>
 
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
